@@ -34,7 +34,7 @@ module Rails
       self.update_attribute(:deleted_at, deleted_at)
       self.class.reflect_on_all_associations(:has_many).each do |reflection|
         if reflection.options[:dependent].eql?(:destroy)
-          self.send(reflection.name).each { |obj| obj.destroy_with_trash }
+          self.send(reflection.name).each { |obj| obj.destroy }
         end
       end
     end
