@@ -12,10 +12,9 @@ module Rails
     module ClassMethods
 
       def deleted(field = nil, value = nil)
-        deleted_at = Arel::Table.new(self.table_name)[:deleted_at]
-        data = unscoped
+        data = unscope(where: :deleted_at)
         data = data.where(field => value) if field && value
-        data.where(deleted_at.not_eq(nil))
+        data.where.not(deleted_at: nil)
       end
 
       def find_in_trash(id)
