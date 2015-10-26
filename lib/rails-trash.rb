@@ -42,6 +42,15 @@ module Rails
       self.update_attribute(:deleted_at, nil)
     end
 
+	def restore_with_children
+	  self.class.reflect_on_all_associations(:has_many).each do |reflection|
+        if reflection.options[:dependent].eql?(:destroy)
+		  self.restore
+          self.send(reflection.name).each { |obj| obj.restore_with_children }
+        end
+      end
+    end
+
     def disable_trash
       save_val = @trash_is_disabled
       begin
