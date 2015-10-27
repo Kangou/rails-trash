@@ -43,9 +43,9 @@ module Rails
     end
 
 	def restore_with_children
+      self.restore
 	  self.class.reflect_on_all_associations(:has_many).each do |reflection|
         if reflection.options[:dependent].eql?(:destroy)
-		  self.restore
           self.send(reflection.name).try(:deleted).try(:each) { |obj| obj.try(:restore_with_children) }
         end
       end
