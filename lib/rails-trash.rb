@@ -29,6 +29,10 @@ module Rails
         find_in_trash(id).restore
       end
 
+      def deleted_after(date)
+        where(arel_table[:deleted_at].gteq(date))
+      end
+
     end
 
     def destroy_with_trash
@@ -46,11 +50,14 @@ module Rails
       self.update_attribute(:deleted_at, nil)
     end
 
-	def restore_with_children
-      self.restore
-	  self.class.reflect_on_all_associations(:has_many).each do |reflection|
-        if reflection.options[:dependent].eql?(:destroy)
-          self.send(reflection.name).try(:deleted).try(:each) { |obj| obj.try(:restore_with_children) }
+    def restore_with_children
+      date = self.deleted_at
+      if date.present?
+        self.restore
+        self.class.reflect_on_all_associations(:has_many).each do |reflection|
+          if reflection.options[:dependent].eql?(:destroy)
+            self.send(reflection.name).try(:deleted).try(:deleted_after, date).try(:each) { |obj| obj.try(:restore_with_children) }
+          end
         end
       end
     end
