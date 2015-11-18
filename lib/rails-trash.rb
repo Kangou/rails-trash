@@ -17,6 +17,10 @@ module Rails
         data.where.not(deleted_at: nil)
       end
 
+      def with_deleted
+        unscope(where: :deleted_at)
+      end
+
       def find_in_trash(id)
         deleted.find(id)
       end
