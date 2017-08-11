@@ -44,6 +44,11 @@ module Rails
           self.send(reflection.name).each { |obj| obj.destroy }
         end
       end
+      self.class.reflect_on_all_associations(:has_one).each do |reflection|
+        if reflection.options[:dependent].eql?(:destroy)
+          self.send(reflection.name).each { |obj| obj.destroy }
+        end
+      end
     end
 
     def restore
