@@ -39,9 +39,14 @@ module Rails
       return destroy_without_trash if @trash_is_disabled
       deleted_at = Time.now.utc
       self.update_attribute(:deleted_at, deleted_at)
-      self.class.reflect_on_all_associations.each do |reflection|
+      self.class.reflect_on_all_associations(:has_many).each do |reflection|
         if reflection.options[:dependent].eql?(:destroy)
           self.send(reflection.name).each { |obj| obj.destroy }
+        end
+      end
+      self.class.reflect_on_all_associations(:has_one).each do |reflection|
+        if reflection.options[:dependent].eql?(:destroy)
+          self.send(reflection.name).destroy
         end
       end
     end
@@ -57,6 +62,11 @@ module Rails
         self.class.reflect_on_all_associations(:has_many).each do |reflection|
           if reflection.options[:dependent].eql?(:destroy)
             self.send(reflection.name).try(:deleted).try(:deleted_after, date).try(:each) { |obj| obj.try(:restore_with_children) }
+          end
+        end
+        self.class.reflect_on_all_associations(:has_one).each do |reflection|
+          if reflection.options[:dependent].eql?(:destroy)
+            self.send(reflection.name).try(:deleted).try(:deleted_after, date).try(:restore_with_children)
           end
         end
       end
