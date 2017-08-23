@@ -52,7 +52,7 @@ module Rails
     end
 
     def restore
-      self.update_attributes(:deleted_at, nil, updated_at: Time.now)
+      self.update_attributes(deleted_at: nil, updated_at: Time.now)
     end
 
     def restore_with_children
